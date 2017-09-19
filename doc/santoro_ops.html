@@ -1,0 +1,202 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module santoro_ops</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module santoro_ops</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The module provides functions which implement the semantics of
+   the primitives described by N.Santoro in 'Design and Analysis of
+   Distributed Algorithms'.
+
+<p><b>Authors:</b> Lewis Grozinger (<a href="mailto:lewis.grozinger@student.manchester.ac.uk"><tt>lewis.grozinger@student.manchester.ac.uk</tt></a>).</p>
+
+<h2><a name="description">Description</a></h2>The module provides functions which implement the semantics of
+   the primitives described by N.Santoro in 'Design and Analysis of
+   Distributed Algorithms'.
+   Functions which alter the state of the vertex/node on which they operate
+   return the new modified state. Operations which do not alter state
+   in general only return some value or perform some side effect (message
+   passing).
+   <h3>Some terminology</h3>
+   <ul>
+     <li>State refers to the state record defined in santoro.hrl and
+         encapsulates the in-list, out-list, name, status and local memory of
+         the node.
+     </li>
+     <li>Status refers to the state of the node at any point in time, and
+         effects which rule is executed in response to an event.
+     </li>
+     <li>Rules are sets of actions to be executed by the node in response
+         to events; which rule is triggered in response to an event also
+         depends on the node's status.
+     </li>
+   </ul>
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-neighbour">neighbour()</a></h3>
+<p><tt>neighbour() = {Name::atom(), pid()}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-state">state()</a></h3>
+<p><tt>state() = #state{}</tt></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#add_to_nin-2">add_to_nin/2</a></td><td>Adds the neighbours in the Extras list to the Nin list of the
+  vertex.</td></tr>
+<tr><td valign="top"><a href="#add_to_nout-2">add_to_nout/2</a></td><td>Adds the neighbours in the Extras list to the Nout list of the
+  vertex.</td></tr>
+<tr><td valign="top"><a href="#become-2">become/2</a></td><td>
+  Takes a state and a target status name and returns a new state
+  which is a copy of the old but with 'status' set to the target status.</td></tr>
+<tr><td valign="top"><a href="#mem_get-2">mem_get/2</a></td><td>Returns the erlang term which is the value of the entry in the
+  CurrentState record's memory map with key Key, or {error, Reason} if
+  for example, the key does not already exist.</td></tr>
+<tr><td valign="top"><a href="#mem_put-3">mem_put/3</a></td><td>Updates or creates an entry in the CurrentState record's memory
+  map with value Value, emulating variable assignment or declaration and
+  assignment.</td></tr>
+<tr><td valign="top"><a href="#nin-1">nin/1</a></td><td>Gets the list of in-neighbours from a vertex's state record.</td></tr>
+<tr><td valign="top"><a href="#nout-1">nout/1</a></td><td>Gets the list of out-neighbours from a vertex's state record.</td></tr>
+<tr><td valign="top"><a href="#sendto-3">sendto/3</a></td><td>Sends Message to all the vertices with names in SendList, provided
+  that the name appears in the outlist of CurrentState.</td></tr>
+<tr><td valign="top"><a href="#sub_from_nin-2">sub_from_nin/2</a></td><td>Removes the neighbours in the Victims list from the Nin list of
+  the vertex.</td></tr>
+<tr><td valign="top"><a href="#sub_from_nout-2">sub_from_nout/2</a></td><td>Removes the neighbours in the Victims list from the Nout list of
+  the vertex.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="add_to_nin-2">add_to_nin/2</a></h3>
+<div class="spec">
+<p><tt>add_to_nin(Extras, CurrentState) -&gt; NewState</tt>
+<ul class="definitions"><li><tt>Extras = [<a href="#type-neighbour">neighbour()</a>]</tt></li><li><tt>CurrentState = <a href="#type-state">state()</a></tt></li><li><tt>NewState = <a href="#type-state">state()</a></tt></li></ul></p>
+<p><tt>Extras</tt>: the neighbours to add to the inlist.<br>
+<tt>CurrentState</tt>: the current state record containing the inlist
+  to mutate.<br>
+</p>
+<p>returns: the modified state.</p>
+</div><p>Adds the neighbours in the Extras list to the Nin list of the
+  vertex.</p>
+
+<h3 class="function"><a name="add_to_nout-2">add_to_nout/2</a></h3>
+<div class="spec">
+<p><tt>add_to_nout(Extras, CurrentState) -&gt; NewState</tt>
+<ul class="definitions"><li><tt>Extras = [<a href="#type-neighbour">neighbour()</a>]</tt></li><li><tt>CurrentState = <a href="#type-state">state()</a></tt></li><li><tt>NewState = <a href="#type-state">state()</a></tt></li></ul></p>
+<p><tt>Extras</tt>: the neighbours to add to the outlist.<br>
+<tt>CurrentState</tt>: the current state record containing the outlist
+  to mutate.<br>
+</p>
+<p>returns: the modified state.</p>
+</div><p>Adds the neighbours in the Extras list to the Nout list of the
+  vertex.</p>
+
+<h3 class="function"><a name="become-2">become/2</a></h3>
+<div class="spec">
+<p><tt>become(NewStatus, CurrentState) -&gt; NewState</tt>
+<ul class="definitions"><li><tt>NewStatus = atom()</tt></li><li><tt>CurrentState = <a href="#type-state">state()</a></tt></li><li><tt>NewState = <a href="#type-state">state()</a></tt></li></ul></p>
+<p><tt>NewStatus</tt>: The name of the target status for this state.<br>
+<tt>CurrentState</tt>: The state record to return an altered copy of.<br>
+</p>
+<p>returns: A new state record, a copy of CurrentState, but with status
+  NewStatus.</p>
+</div><p>
+  Takes a state and a target status name and returns a new state
+  which is a copy of the old but with 'status' set to the target status.</p>
+
+<h3 class="function"><a name="mem_get-2">mem_get/2</a></h3>
+<div class="spec">
+<p><tt>mem_get(Key, CurrentState) -&gt; Value | {error, Reason}</tt>
+<ul class="definitions"><li><tt>Key = string()</tt></li><li><tt>CurrentState = <a href="#type-state">state()</a></tt></li><li><tt>Value = any()</tt></li><li><tt>Reason = string()</tt></li></ul></p>
+<p><tt>Key</tt>: the key corresponding to the desired entry in the map, in
+  other words the "variable" name.<br>
+<tt>CurrentState</tt>: a state record representing the current state of
+  the memory of the vertex.<br>
+</p>
+<p>returns: the value of the "variable" called Key, or {error, Reason} if
+  for example, the "variable" has not yet been "assigned".</p>
+</div><p>Returns the erlang term which is the value of the entry in the
+  CurrentState record's memory map with key Key, or {error, Reason} if
+  for example, the key does not already exist.</p>
+
+<h3 class="function"><a name="mem_put-3">mem_put/3</a></h3>
+<div class="spec">
+<p><tt>mem_put(Key, Value, CurrentState) -&gt; NewState | {error, Reason}</tt>
+<ul class="definitions"><li><tt>Key = string()</tt></li><li><tt>CurrentState = <a href="#type-state">state()</a></tt></li><li><tt>NewState = <a href="#type-state">state()</a></tt></li><li><tt>Value = any()</tt></li><li><tt>Reason = string()</tt></li></ul></p>
+<p><tt>Key</tt>: the name of the emulated variable.<br>
+<tt>Value</tt>: the value which should be assigned to the emulated variable.<br>
+<tt>CurrentState</tt>: the state record representing the current state of the
+  vertex.<br>
+</p>
+<p>returns: A new state record, which is a copy of CurrentState, except that
+  it's memory map reflects the assignment.</p>
+</div><p>Updates or creates an entry in the CurrentState record's memory
+  map with value Value, emulating variable assignment or declaration and
+  assignment.</p>
+
+<h3 class="function"><a name="nin-1">nin/1</a></h3>
+<div class="spec">
+<p><tt>nin(State) -&gt; NameList</tt>
+<ul class="definitions"><li><tt>State = <a href="#type-state">state()</a></tt></li><li><tt>NameList = [atom()]</tt></li></ul></p>
+<p><tt>State</tt>: the state record of the vertex.<br>
+</p>
+<p>returns: the list of in-neighbours of the vertex.</p>
+</div><p>Gets the list of in-neighbours from a vertex's state record.</p>
+
+<h3 class="function"><a name="nout-1">nout/1</a></h3>
+<div class="spec">
+<p><tt>nout(State) -&gt; NameList</tt>
+<ul class="definitions"><li><tt>State = <a href="#type-state">state()</a></tt></li><li><tt>NameList = [atom()]</tt></li></ul></p>
+<p><tt>State</tt>: the state record of the vertex.<br>
+</p>
+<p>returns: the list of out-neighbours of the vertex.</p>
+</div><p>Gets the list of out-neighbours from a vertex's state record.</p>
+
+<h3 class="function"><a name="sendto-3">sendto/3</a></h3>
+<div class="spec">
+<p><tt>sendto(Message, SendList, CurrentState) -&gt; ok | {error, Reason}</tt>
+<ul class="definitions"><li><tt>Message = tuple()</tt></li><li><tt>SendList = [atom()]</tt></li><li><tt>CurrentState = <a href="#type-state">state()</a></tt></li><li><tt>Reason = string()</tt></li></ul></p>
+<p><tt>Message</tt>: the message to be sent, which is some tuple.<br>
+<tt>SendList</tt>: a list of names addressing vertices to which the message
+  should be sent.<br>
+<tt>CurrentState</tt>: the state record of the sending vertex.<br>
+</p>
+<p>returns: ok if the operation is a success, {error, Reason} otherwise.</p>
+</div><p>Sends Message to all the vertices with names in SendList, provided
+  that the name appears in the outlist of CurrentState.</p>
+
+<h3 class="function"><a name="sub_from_nin-2">sub_from_nin/2</a></h3>
+<div class="spec">
+<p><tt>sub_from_nin(Victims, CurrentState) -&gt; NewState</tt>
+<ul class="definitions"><li><tt>Victims = [<a href="#type-neighbour">neighbour()</a>]</tt></li><li><tt>CurrentState = <a href="#type-state">state()</a></tt></li><li><tt>NewState = <a href="#type-state">state()</a></tt></li></ul></p>
+<p><tt>Victims</tt>: the neighbours to remove from the inlist.<br>
+<tt>CurrentState</tt>: the current state record containing the inlist to
+  mutate.<br>
+</p>
+<p>returns: the modified state.</p>
+</div><p>Removes the neighbours in the Victims list from the Nin list of
+  the vertex.</p>
+
+<h3 class="function"><a name="sub_from_nout-2">sub_from_nout/2</a></h3>
+<div class="spec">
+<p><tt>sub_from_nout(Victims, CurrentState) -&gt; NewState</tt>
+<ul class="definitions"><li><tt>Victims = [<a href="#type-neighbour">neighbour()</a>]</tt></li><li><tt>CurrentState = <a href="#type-state">state()</a></tt></li><li><tt>NewState = <a href="#type-state">state()</a></tt></li></ul></p>
+<p><tt>Victims</tt>: the neighbours to remove from the outlist.<br>
+<tt>CurrentState</tt>: the current state record containing the outlist to
+  mutate.<br>
+</p>
+<p>returns: the modified state.</p>
+</div><p>Removes the neighbours in the Victims list from the Nout list of
+  the vertex.</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>
