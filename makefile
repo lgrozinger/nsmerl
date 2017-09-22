@@ -5,7 +5,7 @@ EBIN_DIR = ./ebin
 ERLC_FLAGS = -o ${EBIN_DIR} -I ${ERL_SRC_DIR}
 
 # A complete list of modules to compile
-MODULES = nsmops list_misc
+MODULES = nsmops list_misc dsl_scan dsl_parse
 
 # A complete list of test suites
 TST_SUITES = santoro_ops_SUITE
