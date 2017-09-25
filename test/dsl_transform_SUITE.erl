@@ -134,7 +134,7 @@ test_become_transform(__Config) ->
 
     Actual   = erl_syntax:revert(StandardTree),
     {match,_,{var,_,_}
-       ,{call,_,{remote,{atom,_,'nsmops'}
+       ,{call,_,{remote, _, {atom,_,'nsmops'}
 		 ,{atom,_,'become'}}
 	,[{atom,_,'green'},{var,_,'V0'}]}} = Actual.
 

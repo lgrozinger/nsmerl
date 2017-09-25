@@ -10,6 +10,8 @@
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
+-include_lib("syntax_tools/include/merl.hrl").
+
 
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
@@ -108,7 +110,9 @@ all() ->
     [test_module_loadable,
      test_function,
      test_add_function_clause_empty_function,
-     test_add_function_clause].
+     test_add_function_clause,
+     test_remote_call,
+     test_remote_call_with_args].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -142,6 +146,23 @@ test_add_function_clause(_Config) ->
     Function1 = erl_tree:add_clause(Clause1, erl_tree:function(function)),
     Function2 = erl_tree:add_clause(Clause2, Function1),
     [Clause2, Clause1] = erl_syntax:function_clauses(Function2).
+
+test_remote_call(_Config) ->
+    Expected = merl:quote(0, "module:function()"),
+    Actually = erl_syntax:revert(erl_tree:remote_call('module', 'function', [])),
+    Expected = Actually.
+
+test_remote_call_with_args(_Config) ->
+    Arg1 = {arg1, 42},
+    Arg2 = arg2,
+    Arg3 = 3,
+
+    RemoteTree = erl_tree:remote_call('module', 'function', [Arg1, Arg2, Arg3]),
+    MerlTree   = merl:quote(0, "module:function(_@Arg1@, _@Arg2@, _@Arg3@)"),
+
+    Actually = erl_syntax:revert(RemoteTree),
+    Expected = erl_syntax:revert(MerlTree),
+    Expected = Actually.
 
 
     

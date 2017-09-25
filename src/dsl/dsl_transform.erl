@@ -30,11 +30,11 @@
 become(DslTree, {Used, Current}) ->
     NewCurrent = erl_syntax_lib:new_variable_name(Used),
     NewUsed    = sets:add_element(NewCurrent, Used),
+    [{become, {state, NewStatus}}] = DslTree,
     
-    erl_tree:function(test).
-
-    
-	      
+    Pattern = erl_syntax:variable(NewCurrent),
+    Body = erl_tree:remote_call('nsmops', 'become', [NewStatus, {var, Current}]),
+    {{NewUsed, NewCurrent}, erl_syntax:match_expr(Pattern, Body)}.
 
 %%%===================================================================
 %%% Internal functions
