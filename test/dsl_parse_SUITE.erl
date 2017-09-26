@@ -114,7 +114,9 @@ all() ->
      test_parse_nout,
      test_parse_become,
      test_parse_sendto,
-     test_parse_rule].
+     test_parse_rule,
+     test_parse_example_source,
+     test_parse_standard_source].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -185,4 +187,10 @@ test_parse_nout(_Config) ->
     Expected = Actually.
 
 test_parse_example_source(_Config) ->
-    {ok, Tokens, _End} = dsl_scan:file("../../dsl_parse_SUITE_data/example.nsm").
+    {ok, _Tokens, _End} = dsl_scan:file("../../dsl_scan_SUITE_data/extended.erl").
+
+test_parse_standard_source(_Config) ->
+    {ok, Tokens, _} = dsl_scan:file("../../dsl_scan_SUITE_data/standard.erl"),
+    {ok, FileAsBin} = file:read_file("../../dsl_scan_SUITE_data/standard.erl"),
+    {ok, Tokens, _} = erl_scan:string(unicode:characters_to_list(FileAsBin)).
+

@@ -9,7 +9,9 @@
 -module(dsl_transform).
 
 %% API
--export([become/2]).
+-export([become/2,
+	 nin/1,
+	 nout/1]).
 
 %%%===================================================================
 %%% API
@@ -35,6 +37,31 @@ become(DslTree, {Used, Current}) ->
     Pattern = erl_syntax:variable(NewCurrent),
     Body = erl_tree:remote_call('nsmops', 'become', [NewStatus, {var, Current}]),
     {{NewUsed, NewCurrent}, erl_syntax:match_expr(Pattern, Body)}.
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Returns the syntax tree for the nin statement.
+%% @end
+%%--------------------------------------------------------------------
+-spec nin(TransformState) -> Tree when 
+      TransformState :: {sets:set(), atom()},
+      Tree           :: erl_syntax:syntaxTree().
+
+nin({_, Current}) ->
+    erl_tree:remote_call('nsmops', 'nin', [{var, Current}]).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Returns the syntax tree for the nout statement.
+%% @end
+%%--------------------------------------------------------------------
+-spec nout(TransformState) -> Tree when 
+      TransformState :: {sets:set(), atom()},
+      Tree           :: erl_syntax:syntaxTree().
+
+nout({_, Current}) ->
+    erl_tree:remote_call('nsmops', 'nout', [{var, Current}]).
+
 
 %%%===================================================================
 %%% Internal functions

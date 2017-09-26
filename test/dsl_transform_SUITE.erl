@@ -106,7 +106,9 @@ groups() ->
 %%--------------------------------------------------------------------
 all() -> 
     [test_module_loadable,
-     test_become_transform].
+     test_become_transform,
+     test_nin_transform,
+     test_nout_transform].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -123,20 +125,49 @@ test_module_loadable(__Config) ->
 
 
 test_become_transform(__Config) ->
-
+    %% get the tree
     {ok, DslTokens, _} = dsl_scan:string("become green."), 
     {ok, DslTree}      = dsl_parse:parse_exprs(DslTokens),
+    %% set the transform state
+    Used = sets:add_element('V0', sets:new()),
+    S    = {Used, 'V0'},
+    %% do the transform
+    {_NewS, StandardTree} = dsl_transform:become(DslTree, S),
+    Actually = erl_syntax:revert(StandardTree),
 
-    Used      = sets:add_element('V0', sets:new()),
-    S         = {Used, 'V0'},
+    {match,_,{var,_,_},
+     {call,_,
+      {remote,_,{atom,_,'nsmops'},{atom,_,'become'}},
+      [{atom,_,'green'},{var,_,'V0'}]}} = Actually.
 
-    {{_NewUsed, _Current}, StandardTree} = dsl_transform:become(DslTree, S),
+test_nin_transform(__Config) ->
+    %% get the tree
+    {ok, DslTokens, _} = dsl_scan:string("nin."),
+    {ok, DslTree}      = dsl_parse:parse_exprs(DslTokens),
+    %% set the transform state
+    Used = sets:add_element('V0', sets:new()),
+    S    = {Used, 'V0'},
+    StandardTree = dsl_transform:nin(S),
+    Actually = erl_syntax:revert(StandardTree),
 
-    Actual   = erl_syntax:revert(StandardTree),
-    {match,_,{var,_,_}
-       ,{call,_,{remote, _, {atom,_,'nsmops'}
-		 ,{atom,_,'become'}}
-	,[{atom,_,'green'},{var,_,'V0'}]}} = Actual.
+    {call,_,
+     {remote,_,{atom,_,'nsmops'},{atom,_,'nin'}},
+     [{var,_,'V0'}]} = Actually.
+    
+test_nout_transform(__Config) ->
+    %% get the tree
+    {ok, DslTokens, _} = dsl_scan:string("nout."),
+    {ok, DslTree}      = dsl_parse:parse_exprs(DslTokens),
+    %% set the transform state
+    Used = sets:add_element('V0', sets:new()),
+    S    = {Used, 'V0'},
+    StandardTree = dsl_transform:nout(S),
+    Actually = erl_syntax:revert(StandardTree),
+
+    {call,_,
+     {remote,_,{atom,_,'nsmops'},{atom,_,'nout'}},
+     [{var,_,'V0'}]} = Actually.
+    
 
 
     
