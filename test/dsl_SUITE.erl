@@ -108,7 +108,8 @@ groups() ->
 %%--------------------------------------------------------------------
 all() -> 
     [test_eval_become,
-     test_eval_multiple_become].
+     test_eval_multiple_become,
+     test_eval_nin].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -156,9 +157,28 @@ test_eval_multiple_become(_Config) ->
     {S1, Tree1} = dsl_transform:become(ExtTree1, S),
     {_,  Tree2} = dsl_transform:become(ExtTree2, S1),
 
-    {value, Value, After} = erl_eval:exprs(erl_syntax:revert_forms([Tree1, Tree2]), Before),
+    {value, Value, _} = erl_eval:exprs(erl_syntax:revert_forms([Tree1, Tree2]), Before),
     
     #state{status=Second} = Value,
     Second = second.
   
+test_eval_nin(_Config) ->
+    %% setup the state
+    InList = [{entity1, self()}, {entity2, self()}],
+    State0 = #state{name=entity,inlist=InList},
+    %% setup the environment (binding structure)
+    Before = erl_eval:add_binding('V0', State0, erl_eval:new_bindings()),
+    
+    {ok, Tokens, _End} = dsl_scan:string("nin."),
+    {ok, ExtTree}      = dsl_parse:parse_exprs(Tokens),
+
+    Used = sets:add_element('V0', sets:new()),
+    S    = {Used, 'V0'},
+
+    Tree = dsl_transform:nin(S),
+    Nin = [Name || {Name, _} <- InList],
+    {value, Nin, _} = erl_eval:expr(erl_syntax:revert(Tree), Before).
+    
+    
+    
     
