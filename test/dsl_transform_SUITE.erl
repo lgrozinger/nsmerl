@@ -141,9 +141,6 @@ test_become_transform(__Config) ->
       [{atom,_,'green'},{var,_,'V0'}]}} = Actually.
 
 test_nin_transform(__Config) ->
-    %% get the tree
-    {ok, DslTokens, _} = dsl_scan:string("nin."),
-    {ok, DslTree}      = dsl_parse:parse_exprs(DslTokens),
     %% set the transform state
     Used = sets:add_element('V0', sets:new()),
     S    = {Used, 'V0'},
@@ -155,9 +152,6 @@ test_nin_transform(__Config) ->
      [{var,_,'V0'}]} = Actually.
     
 test_nout_transform(__Config) ->
-    %% get the tree
-    {ok, DslTokens, _} = dsl_scan:string("nout."),
-    {ok, DslTree}      = dsl_parse:parse_exprs(DslTokens),
     %% set the transform state
     Used = sets:add_element('V0', sets:new()),
     S    = {Used, 'V0'},

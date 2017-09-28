@@ -109,7 +109,8 @@ groups() ->
 all() -> 
     [test_eval_become,
      test_eval_multiple_become,
-     test_eval_nin].
+     test_eval_nin,
+     test_eval_nout].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -134,7 +135,7 @@ test_eval_become(_Config) ->
     S    = {Used, 'V0'},
 
     {_, ErlTree}          = dsl_transform:become(ExtTree, S),
-    {value, Value, After} = erl_eval:expr(erl_syntax:revert(ErlTree), Before),
+    {value, Value, _} = erl_eval:expr(erl_syntax:revert(ErlTree), Before),
     
     #state{status=Passed} = Value,
     Passed = passed.
@@ -168,10 +169,7 @@ test_eval_nin(_Config) ->
     State0 = #state{name=entity,inlist=InList},
     %% setup the environment (binding structure)
     Before = erl_eval:add_binding('V0', State0, erl_eval:new_bindings()),
-    
-    {ok, Tokens, _End} = dsl_scan:string("nin."),
-    {ok, ExtTree}      = dsl_parse:parse_exprs(Tokens),
-
+   
     Used = sets:add_element('V0', sets:new()),
     S    = {Used, 'V0'},
 
@@ -179,6 +177,19 @@ test_eval_nin(_Config) ->
     Nin = [Name || {Name, _} <- InList],
     {value, Nin, _} = erl_eval:expr(erl_syntax:revert(Tree), Before).
     
+test_eval_nout(_Config) ->    
+    %% setup the state
+    OutList = [{out1, self()}, {out2, self()}],
+    State0 = #state{name=who, outlist=OutList},
+    %% setup the evaluation environment
+    Binding = erl_eval:add_binding('V0', State0, erl_eval:new_bindings()),
+       
+    Used = sets:add_element('V0', sets:new()),
+    S = {Used, 'V0'},
     
+    Tree = dsl_transform:nout(S),
+    Expect = [Name || {Name, _} <- OutList],
+    {value, Expect, _} = erl_eval:expr(erl_syntax:revert(Tree), Binding).
+		     
     
     
