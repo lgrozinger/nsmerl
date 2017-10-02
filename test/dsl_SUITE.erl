@@ -110,7 +110,8 @@ all() ->
     [test_eval_become,
      test_eval_multiple_become,
      test_eval_nin,
-     test_eval_nout].
+     test_eval_nout,
+     test_eval_sendto].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -192,4 +193,25 @@ test_eval_nout(_Config) ->
     {value, Expect, _} = erl_eval:expr(erl_syntax:revert(Tree), Binding).
 		     
     
+test_eval_sendto(_Config) ->
+    % setup the state
+    OutList = [{entity, self()}],
+    State0 = #state{name=entity,outlist=OutList},
+    % setup the eval environment
+    Binding = erl_eval:add_binding('V0', State0, erl_eval:new_bindings()),
     
+    Used = sets:add_element('V0', sets:new()),
+    S = {Used, 'V0'},
+
+    {ok, Tokens, _End} = dsl_scan:string("send {num, 42} to [entity]."),
+    {ok, ExtTree} = dsl_parse:parse_exprs(Tokens),
+    
+    Tree = dsl_transform:sendto(ExtTree, S),
+    {value, ok, _B} = erl_eval:expr(erl_syntax:revert(Tree), Binding),
+    receive
+	{num, 42} ->
+	    ok
+    after
+	1000 ->
+	    ct:fail({fail, "Expected message not received within timeout\n"})
+    end.

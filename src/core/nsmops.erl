@@ -69,7 +69,7 @@ become(NewStatus, CurrentState) ->
 %% @end
 %%--------------------------------------------------------------------
 -spec sendto(Message, SendList, CurrentState) -> ok | {error, Reason} when
-      Message      :: tuple(),
+      Message      :: any(),
       SendList     :: [atom()],
       CurrentState :: state(),
       Reason       :: string().

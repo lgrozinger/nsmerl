@@ -108,7 +108,8 @@ all() ->
     [test_module_loadable,
      test_become_transform,
      test_nin_transform,
-     test_nout_transform].
+     test_nout_transform,
+     test_send_to_transform].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->
@@ -161,9 +162,17 @@ test_nout_transform(__Config) ->
     {call,_,
      {remote,_,{atom,_,'nsmops'},{atom,_,'nout'}},
      [{var,_,'V0'}]} = Actually.
-    
 
-
+test_send_to_transform(__Config) ->
+    {ok, DslTokens, _} = dsl_scan:string("send MsgData to [name]."),
+    {ok, DslTree} = dsl_parse:parse_exprs(DslTokens),
+    Used = sets:add_element('V0', sets:new()),
+    S = {Used, 'V0'},
+    ErlTree = dsl_transform:sendto(DslTree, S),
+    Actually = erl_syntax:revert(ErlTree),
+    {call, _,
+     {remote, _, {atom, _, 'nsmops'}, {atom, _, 'sendto'}},
+     [{var, _, 'MsgData'},
+      {cons, _, {atom, _, 'name'}, {nil, _}},
+      {var, _, 'V0'}]} = Actually.
     
-    
-						
