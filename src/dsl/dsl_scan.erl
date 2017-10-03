@@ -9,7 +9,7 @@
 %%%-------------------------------------------------------------------
 -module(dsl_scan).
 
--export([reserved_word/1, string/1, file/1]).
+-export([reserved_word/1, string/1, file/1, scan/1]).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -65,3 +65,25 @@ file(File) ->
     {ok, FileAsBin} = file:read_file(File),
     FileAsString = binary:bin_to_list(FileAsBin),
     erl_scan:string(FileAsString, 1, {reserved_word_fun, fun reserved_word/1}).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Tokenises a string and returns a list of lists of Tokens, where each sublist
+%% contains the tokens for one form, including the 'dot' token.
+%% @param Input a string of Erlang source code.
+%% @returns A list of lists of Tokens.
+%% @end
+%%--------------------------------------------------------------------
+-spec scan(Input) -> [Forms] when 
+      Input :: string(),
+      Forms :: [erl_scan:token()].
+
+scan(Input) ->    
+    scan(Input++eof, []).
+
+scan(String, Acc) when is_list(String) ->
+    scan(erl_scan:tokens([], String, 1), Acc);
+scan({done, {ok, Tokens, _L}, LeftOver}, Acc) ->
+    scan(LeftOver, [Tokens|Acc]);
+scan(eof, Acc) ->
+    lists:reverse(Acc).
