@@ -3,7 +3,7 @@
 %%% @copyright (C) 2017, lewis grozinger
 %%% @doc
 %%% Tokenises input just as erl_scan would, but adds several categories
-%%% which are used by the DSL to define behaviour and topology of the system.
+%%% which are used by the DSL to define behaviour of the system.
 %%% @end
 %%% Created : 21 Aug 2017 by lewis grozinger <lewis@lewis.lewis>
 %%%-------------------------------------------------------------------
@@ -82,7 +82,7 @@ scan(Input) ->
     scan(Input++eof, []).
 
 scan(String, Acc) when is_list(String) ->
-    scan(erl_scan:tokens([], String, 1), Acc);
+    scan(erl_scan:tokens([],String,1,{reserved_word_fun,fun reserved_word/1}),Acc);
 scan({done, {ok, Tokens, _L}, LeftOver}, Acc) ->
     scan(LeftOver, [Tokens|Acc]);
 scan(eof, Acc) ->

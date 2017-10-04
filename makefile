@@ -1,11 +1,12 @@
 .SUFFIXES: .erl .beam .yrl
 
 ERL_SRC_DIR = ./src
+ERL_INCLUDE_DIR = ./include
 EBIN_DIR = ./ebin
-ERLC_FLAGS = -o ${EBIN_DIR} -I ${ERL_SRC_DIR}
+ERLC_FLAGS = -o ${EBIN_DIR} -I ${ERL_SRC_DIR} -I ${ERL_INCLUDE_DIR}
 
 # A complete list of modules to compile
-MODULES = nsmops list_misc dsl_scan dsl_parse dsl_transform erl_tree
+MODULES = nsmops list_misc dsl_scan dsl_parse dsl_transform erl_tree dslc
 
 # A complete list of test suites
 TST_SUITES = santoro_ops_SUITE
@@ -35,7 +36,7 @@ compile: ${MODULES:%=%.beam}
 
 test: compile
 	mkdir -p ${TST_LOG_DIR}
-	@ct_run -include ${ERL_SRC_DIR} -pz ${EBIN_DIR} -dir ${TST_DIR} -logdir ${TST_LOG_DIR} && echo ${TST_PASS_MSG} || echo ${TST_FAIL_MSG}
+	@ct_run -include ${ERL_SRC_DIR} -include ${ERL_INCLUDE_DIR} -pz ${EBIN_DIR} -dir ${TST_DIR} -logdir ${TST_LOG_DIR} && echo ${TST_PASS_MSG} || echo ${TST_FAIL_MSG}
 
 clean:
 	rm -rf ${EBIN_DIR}/*

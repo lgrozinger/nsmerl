@@ -1,0 +1,10 @@
+-module(dslc_test).
+
+-export([listen/1, some_function/0]).
+
+some_function() ->
+    io:format("This works!\n").
+
+green * receiving Var ->
+      some_function(),
+      become red.

@@ -79,7 +79,7 @@ sendto(Message, SendList, CurrentState) ->
     %% tests if each name in the SendList is a name in the OutList
     %% stops vertices from sending messages to those not on their OutList
     case list_misc:a_subset_of_b(SendList, [N || {N, __P} <- OutList]) of
-	true  -> send_msg_to_names(Message, SendList, OutList),
+	true  -> send_msg_to_names({msg, Message}, SendList, OutList),
 		 ok;
 	false -> {error, "SendList contains names which Nout does not."}
     end.
