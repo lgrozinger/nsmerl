@@ -130,8 +130,8 @@ test_eval_become(_Config) ->
     
     %% tokenise, parse, and transform a string
     {ok, Tokens, _End} = dsl_scan:string("become passed."),
-    {ok, ExtTree}      = dsl_parse:parse_exprs(Tokens), 
-    
+    {ok, [ExtTree]}    = dsl_parse:parse_exprs(Tokens), 
+
     Used = sets:add_element('V0', sets:new()),
     S    = {Used, 'V0'},
 
@@ -149,9 +149,9 @@ test_eval_multiple_become(_Config) ->
     
     %% tokenise, parse, and transform a string
     {ok, Tokens1, _End} = dsl_scan:string("become first."),
-    {ok, ExtTree1}      = dsl_parse:parse_exprs(Tokens1), 
+    {ok, [ExtTree1]}      = dsl_parse:parse_exprs(Tokens1), 
     {ok, Tokens2, _End} = dsl_scan:string("become second."),
-    {ok, ExtTree2}      = dsl_parse:parse_exprs(Tokens2), 
+    {ok, [ExtTree2]}      = dsl_parse:parse_exprs(Tokens2), 
     
     Used = sets:add_element('V0', sets:new()),
     S    = {Used, 'V0'},
@@ -204,14 +204,14 @@ test_eval_sendto(_Config) ->
     S = {Used, 'V0'},
 
     {ok, Tokens, _End} = dsl_scan:string("send {num, 42} to [entity]."),
-    {ok, ExtTree} = dsl_parse:parse_exprs(Tokens),
+    {ok, [ExtTree]} = dsl_parse:parse_exprs(Tokens),
     
     Tree = dsl_transform:sendto(ExtTree, S),
     {value, ok, _B} = erl_eval:expr(erl_syntax:revert(Tree), Binding),
     receive
-	{num, 42} ->
+	{msg, {num, 42}} ->
 	    ok
     after
 	1000 ->
-	    ct:fail({fail, "Expected message not received within timeout\n"})
+	    ct:fail({fail, "Expected message not received within timeout~n"})
     end.

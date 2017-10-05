@@ -57,8 +57,8 @@ form({rule, S, E, P, As}, Rules) ->
 rule({state, S}, {event, E}, {pattern, P}, {actions, As}, Rules) ->
     %% set up the transform state for this scope - the variable names occuring
     %% in P and As are off limits, as is 'State'
-    AsUsed = lists:map(fun erl_syntax_lib:variables/1, As),
-    PUsed = erl_syntax_lib:variables(P),
+    AsUsed = lists:map(fun variables/1, As),
+    PUsed = variables(P),
     Used = sets:add_element('State', sets:union([PUsed|AsUsed])),
     T = {Used, 'State'},
 
@@ -83,10 +83,10 @@ expr({become, S}, State) ->
     {St, F} = become({become, S}, State),
     {F, St};
 expr({sendto, Msg, Targets}, State) ->
-    {_, Mt} = expr(Msg, State),
-    {_, Tt} = expr(Targets, State),
-    {S, F} = sendto({sendto, Mt, Tt}, State),
-    {F, S};
+    {Mt, _} = expr(Msg, State),
+    {Tt, _} = expr(Targets, State),
+    F = sendto({sendto, Mt, Tt}, State),
+    {F, State};
 expr({nin}, State) ->
     {nin(State), State};
 expr({nout}, State) ->
@@ -113,8 +113,8 @@ become(DslTree, {Used, Current}) ->
     
     Pattern = erl_syntax:variable(NewCurrent),
     Body = erl_tree:remote_call('nsmops', 'become', [NewStatus, {var, Current}]),
-    T = {{NewUsed, NewCurrent}, erl_syntax:match_expr(Pattern, Body)},
-    erl_syntax:revert(T).
+    {S, T} = {{NewUsed, NewCurrent}, erl_syntax:match_expr(Pattern, Body)},
+    {S, erl_syntax:revert(T)}.
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -212,3 +212,14 @@ add_clause(C, F) ->
     OldClauses = erl_syntax:function_clauses(F),
     NewClauses = [C|OldClauses],
     erl_syntax:function(erl_syntax:function_name(F), NewClauses).
+
+variables({become, _X}) ->
+    sets:new();
+variables({sendto, {msg, X}, {recipients, Y}}) ->
+    sets:union(variables(X), variables(Y));
+variables({nout}) ->
+    sets:new();
+variables({nin}) ->
+    sets:new();
+variables(T) ->
+    erl_syntax_lib:variables(T).

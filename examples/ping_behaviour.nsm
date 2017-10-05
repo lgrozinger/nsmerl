@@ -1,0 +1,10 @@
+-module(ping_behaviour).
+
+-export([listen/1]).
+
+red * spontaneous {start} ->
+    become green.
+
+green * receiving Msg ->
+    {Sender, Data} = Msg,
+    send {"got it!", Msg} to [Sender].

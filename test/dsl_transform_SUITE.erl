@@ -128,7 +128,7 @@ test_module_loadable(__Config) ->
 test_become_transform(__Config) ->
     %% get the tree
     {ok, DslTokens, _} = dsl_scan:string("become green."), 
-    {ok, DslTree}      = dsl_parse:parse_exprs(DslTokens),
+    {ok, [DslTree]}      = dsl_parse:parse_exprs(DslTokens),
     %% set the transform state
     Used = sets:add_element('V0', sets:new()),
     S    = {Used, 'V0'},
@@ -165,7 +165,7 @@ test_nout_transform(__Config) ->
 
 test_send_to_transform(__Config) ->
     {ok, DslTokens, _} = dsl_scan:string("send MsgData to [name]."),
-    {ok, DslTree} = dsl_parse:parse_exprs(DslTokens),
+    {ok, [DslTree]} = dsl_parse:parse_exprs(DslTokens),
     Used = sets:add_element('V0', sets:new()),
     S = {Used, 'V0'},
     ErlTree = dsl_transform:sendto(DslTree, S),

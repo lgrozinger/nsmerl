@@ -153,7 +153,7 @@ test_sendto(Config) ->
     TestState = nsmops:add_to_nout([{'thisone', self()}], State),
     ok = nsmops:sendto({message}, ['thisone'], TestState),
     receive 
-	{message} -> ok
+	{msg, {message}} -> ok
     end.
 
 test_memory_reference(Config) ->

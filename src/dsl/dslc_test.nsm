@@ -7,4 +7,4 @@ some_function() ->
 
 green * receiving Var ->
       some_function(),
-      become red.
+      become red.12
