@@ -1,0 +1,5 @@
+code:add_pathsz(["../ebin"]).
+io:format("This is an nsmerl Examples session.~n").
+compile:file("ping.erl", [{i, "../include"}]).
+{module, ping} = code:load_file(ping).
+{module, dslc} = code:load_file(dslc).

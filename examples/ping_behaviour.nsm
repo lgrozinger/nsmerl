@@ -6,5 +6,5 @@ red * spontaneous {start} ->
     become green.
 
 green * receiving Msg ->
-    {Sender, Data} = Msg,
-    send {"got it!", Msg} to [Sender].
+    {Sender, Time} = Msg,
+    send erlang:system_time(microsecond) - Time to [Sender].

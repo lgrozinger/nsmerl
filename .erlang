@@ -1,0 +1,2 @@
+code:add_pathsz(["ebin", "examples"]).
+io:format("This is an nsmerl session.~n").

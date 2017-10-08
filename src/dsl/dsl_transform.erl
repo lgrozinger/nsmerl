@@ -54,30 +54,31 @@ form(Function, Rules) when element(1, Function) =:= function ->
 form({rule, S, E, P, As}, Rules) ->
     rule(S, E, P, As, Rules).
     
-rule({state, S}, {event, E}, {pattern, P}, {actions, As}, Rules) ->
+rule({state, S}, {event, E}, {pattern, P}, {actions, As0}, Rules) ->
     %% set up the transform state for this scope - the variable names occuring
     %% in P and As are off limits, as is 'State'
-    AsUsed = lists:map(fun variables/1, As),
+    AsUsed = lists:map(fun variables/1, As0),
     PUsed = variables(P),
     Used = sets:add_element('State', sets:union([PUsed|AsUsed])),
-    T = {Used, 'State'},
+    T0 = {Used, 'State'},
 
     io:format("rule found.\n"),
     %% construct a clause
     %% first transform the actions - these are really expressions
-    Exprs = exprs(As, T),
+    {As1, T1} = exprs(As0, T0),
+    Exprs = As1 ++ [abs_recursive_listen(T1)],
     Status = erl_syntax:atom(S),
     Event = erl_syntax:atom(E),
     State = erl_syntax:variable('State'),
     Clause = erl_syntax:clause([Status, Event, P, State], [], Exprs),
     {{}, erl_syntax:revert(add_clause(Clause, Rules))}.
    
-exprs([E|Rest], S) ->
-    {Et, St} = expr(E, S),
-    Es = exprs(Rest, St),
-    [Et|Es];
-exprs([], _S) ->
-    [].
+exprs([E|Rest], S0) ->
+    {Et, S1} = expr(E, S0),
+    {Es, S2} = exprs(Rest, S1),
+    {[Et|Es], S2};
+exprs([], S0) ->
+    {[], S0}.
 
 expr({become, S}, State) ->
     {St, F} = become({become, S}, State),
@@ -208,6 +209,12 @@ abs_state_record() ->
         "          outlist = [],"
 	"          inlist = [],"
 	"          memory = #{} })."]).
+
+abs_recursive_listen({_Used, Current}) ->
+    Name = erl_syntax:atom('listen'),
+    Arg  = [erl_syntax:variable(Current)],
+    erl_syntax:revert(erl_syntax:application(Name, Arg)).
+
 add_clause(C, F) ->
     OldClauses = erl_syntax:function_clauses(F),
     NewClauses = [C|OldClauses],
